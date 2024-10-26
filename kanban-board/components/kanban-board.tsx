@@ -14,12 +14,41 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label"
 // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-const labelColors = {
+const labelColors: Record<string, string> = {
   label1: '#4DC0B2',
   label2: '#FFC042',
 }
 
-function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive, onSelectTask, availableLabels, onAddLabel }) {
+interface Task {
+  id: string;
+  content: string;
+  labels: string[];
+  goalTime?: string;
+  weeklyTotal: number;
+  monthlyTotal: number;
+  weeklyBestRecord?: number;
+  monthlyBestRecord?: number;
+  isActive: boolean;
+  isSelected: boolean;
+  assignee: string;
+  timeSpent: number;
+  deleted?: boolean; // 追加
+  // 他の必要なプロパティを追加
+}
+
+interface Column {
+  id: string;
+  title: string;
+  taskIds: string[];
+}
+
+interface State {
+  tasks: Record<string, Task>;
+  columns: Record<string, Column>;
+  columnOrder: string[];
+}
+
+function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive, onSelectTask, availableLabels, onAddLabel }: { task: Task, index: number, onEditTask: Function, onStartTimer: Function, onStopTimer: Function, isActive: boolean, onSelectTask: Function, availableLabels: string[], onAddLabel: Function }) {
   const [isEditing, setIsEditing] = useState(false)
   const [content, setContent] = useState(task.content)
   const [isWeeklyView, setIsWeeklyView] = useState(true)
@@ -28,18 +57,20 @@ function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive
   const [goalTime, setGoalTime] = useState(task.goalTime || '')
 
   useEffect(() => {
-    let interval
+    let interval: NodeJS.Timeout | undefined
     if (isActive) {
       interval = setInterval(() => {
         setCurrentTime((prevTime) => prevTime + 1)
       }, 1000)
-    } else {
+    } else if (interval) {
       clearInterval(interval)
     }
-    return () => clearInterval(interval)
+    return () => {
+      if (interval) clearInterval(interval)
+    }
   }, [isActive])
 
-  const formatTime = (seconds) => {
+  const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
     const remainingSeconds = seconds % 60
@@ -52,13 +83,17 @@ function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive
 
   const getBestRecord = () => {
     if (isWeeklyView) {
-      return task.weeklyBestRecord > 0 ? task.weeklyBestRecord : task.weeklyTotal + currentTime
+      return task.weeklyBestRecord !== undefined && task.weeklyBestRecord > 0 
+        ? task.weeklyBestRecord 
+        : task.weeklyTotal + currentTime
     } else {
-      return task.monthlyBestRecord > 0 ? task.monthlyBestRecord : task.monthlyTotal + currentTime
+      return task.monthlyBestRecord !== undefined && task.monthlyBestRecord > 0 
+        ? task.monthlyBestRecord 
+        : task.monthlyTotal + currentTime
     }
   }
 
-  const handleContentChange = (e) => {
+  const handleContentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setContent(e.target.value)
   }
 
@@ -67,14 +102,14 @@ function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive
     onEditTask(task.id, { content })
   }
 
-  const handleContentKeyDown = (e) => {
+  const handleContentKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       setIsEditing(false)
       onEditTask(task.id, { content })
     }
   }
 
-  const handleLabelChange = (labelIndex, newLabel) => {
+  const handleLabelChange = (labelIndex: number, newLabel: string) => {
     const newLabels = [...task.labels]
     newLabels[labelIndex] = newLabel
     onEditTask(task.id, { labels: newLabels })
@@ -215,11 +250,11 @@ function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive
   )
 }
 
-function TaskList({ column, tasks, index, onEditListTitle, onAddTask, onEditTask, onStartTimer, onStopTimer, activeTaskId, onSelectTask, availableLabels, onAddLabel }) {
+function TaskList({ column, tasks, index, onEditListTitle, onAddTask, onEditTask, onStartTimer, onStopTimer, activeTaskId, onSelectTask, availableLabels, onAddLabel }: { column: Column, tasks: Task[], index: number, onEditListTitle: Function, onAddTask: Function, onEditTask: Function, onStartTimer: Function, onStopTimer: Function, activeTaskId: string | null, onSelectTask: Function, availableLabels: string[], onAddLabel: Function }) {
   const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState(column.title)
 
-  const handleTitleChange = (e) => {
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value)
   }
 
@@ -228,10 +263,9 @@ function TaskList({ column, tasks, index, onEditListTitle, onAddTask, onEditTask
     onEditListTitle(column.id, title)
   }
 
-  const handleTitleKeyDown = (e) => {
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       setIsEditing(false)
-      onEditListTitle(column.id, title)
     }
   }
 
@@ -301,8 +335,8 @@ function TaskList({ column, tasks, index, onEditListTitle, onAddTask, onEditTask
   )
 }
 
-function PersistentHeader({ activeTask, elapsedTime, onStopTimer, onStartTimer }) {
-  const formatTime = (seconds) => {
+function PersistentHeader({ activeTask, elapsedTime, onStopTimer, onStartTimer }: { activeTask: Task | null, elapsedTime: number, onStopTimer: () => void, onStartTimer: (taskId: string) => void }) {
+  const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
     const remainingSeconds = seconds % 60
@@ -338,7 +372,7 @@ function PersistentHeader({ activeTask, elapsedTime, onStopTimer, onStartTimer }
 }
 
 export function KanbanBoardComponent() {
-  const [state, setState] = useState({
+  const [state, setState] = useState<State>({
     tasks: {
       'task-1': { id: 'task-1', content: 'タスク1', labels: ['重要', '緊急'], assignee: 'John', timeSpent: 0, weeklyTotal: 3600, monthlyTotal: 7200, goalTime: '', isActive: false, isSelected: false },
       'task-2': { id: 'task-2', content: 'タスク2', labels: ['低優先', '長期'], assignee: 'Jane', timeSpent: 0, weeklyTotal: 1800, monthlyTotal: 3600, goalTime: '', isActive: false, isSelected: false },
@@ -363,13 +397,13 @@ export function KanbanBoardComponent() {
     },
     columnOrder: ['column-1', 'column-2', 'column-3'],
   })
-  const [activeTaskId, setActiveTaskId] = useState(null)
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null)
   const [elapsedTime, setElapsedTime] = useState(0)
   const [selectedTask, setSelectedTask] = useState(state.tasks['task-1'])
-  const [availableLabels, setAvailableLabels] = useState(['重要', '緊急', '低優先', '中優先', '長期', '短期'])
+  const [availableLabels, setAvailableLabels] = useState(['重要', '緊急', '低優先', '優先', '長期', '短期'])
   const [isAddingLabel, setIsAddingLabel] = useState(false)
   const [newLabel, setNewLabel] = useState('')
-  const [editingLabelIndex, setEditingLabelIndex] = useState(null)
+  const [editingLabelIndex, setEditingLabelIndex] = useState<number | null>(null)
 
   const updateTaskTime = useCallback(() => {
     if (activeTaskId) {
@@ -387,7 +421,7 @@ export function KanbanBoardComponent() {
   }, [activeTaskId])
 
   useEffect(() => {
-    let interval
+    let interval: NodeJS.Timeout
     if (activeTaskId) {
       interval = setInterval(() => {
         setElapsedTime((prevTime) => prevTime + 1)
@@ -492,7 +526,7 @@ export function KanbanBoardComponent() {
     })
   }
 
-  const handleEditListTitle = (columnId, newTitle) => {
+  const handleEditListTitle = (columnId: string, newTitle: string) => {
     setState({
       ...state,
       columns: {
@@ -505,7 +539,7 @@ export function KanbanBoardComponent() {
     })
   }
 
-  const handleAddTask = (columnId) => {
+  const handleAddTask = (columnId: string) => {
     const newTaskId = uuidv4()
     const newTask = {
       id: newTaskId,
@@ -537,7 +571,7 @@ export function KanbanBoardComponent() {
     }))
   }
 
-  const handleEditTask = (taskId, updatedFields) => {
+  const handleEditTask = (taskId: string, updatedFields: Partial<Task>) => {
     setState((prevState) => {
       const task = prevState.tasks[taskId]
       if (!task) {
@@ -547,7 +581,7 @@ export function KanbanBoardComponent() {
       if (updatedFields.deleted) {
         const newTasks = { ...prevState.tasks }
         delete newTasks[taskId]
-        const newColumns = Object.keys(prevState.columns).reduce((acc, columnId) => {
+        const newColumns = Object.keys(prevState.columns).reduce<Record<string, Column>>((acc, columnId) => {
           acc[columnId] = {
             ...prevState.columns[columnId],
             taskIds: prevState.columns[columnId].taskIds.filter(id => id !== taskId)
@@ -582,7 +616,7 @@ export function KanbanBoardComponent() {
     })
   }
 
-  const handleStartTimer = (taskId) => {
+  const handleStartTimer = (taskId: string) => {
     if (activeTaskId) {
       handleStopTimer();
     }
@@ -620,8 +654,8 @@ export function KanbanBoardComponent() {
               isActive: false,
               weeklyTotal: newWeeklyTotal,
               monthlyTotal: newMonthlyTotal,
-              weeklyBestRecord: Math.max(task.weeklyBestRecord, newWeeklyTotal),
-              monthlyBestRecord: Math.max(task.monthlyBestRecord, newMonthlyTotal),
+              weeklyBestRecord: Math.max(task.weeklyBestRecord ?? 0, newWeeklyTotal),
+              monthlyBestRecord: Math.max(task.monthlyBestRecord ?? 0, newMonthlyTotal),
             }
           }
         }
@@ -631,7 +665,7 @@ export function KanbanBoardComponent() {
     setElapsedTime(0);
   }
 
-  const handleSelectTask = (task) => {
+  const handleSelectTask = (task: Task) => {
     setState(prevState => ({
       ...prevState,
       tasks: Object.fromEntries(
@@ -648,7 +682,7 @@ export function KanbanBoardComponent() {
     }
   }
 
-  const handleAddLabel = (labelIndex) => {
+  const handleAddLabel = (labelIndex: number) => {
     setEditingLabelIndex(labelIndex);
     setIsAddingLabel(true);
   }
