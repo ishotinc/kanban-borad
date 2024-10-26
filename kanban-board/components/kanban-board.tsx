@@ -55,7 +55,17 @@ type AddTaskFunction = (columnId: string) => void;
 type SelectTaskFunction = (task: Task) => void;
 type AddLabelFunction = (labelIndex: number) => void;
 
-function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive, onSelectTask, availableLabels, onAddLabel }: { task: Task, index: number, onEditTask: EditTaskFunction, onStartTimer: TimerFunction, onStopTimer: TimerFunction, isActive: boolean, onSelectTask: SelectTaskFunction, availableLabels: string[], onAddLabel: AddLabelFunction }) {
+function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive, onSelectTask, availableLabels, onAddLabel }: { 
+  task: Task, 
+  index: number, 
+  onEditTask: EditTaskFunction, 
+  onStartTimer: TimerFunction, 
+  onStopTimer: TimerFunction, 
+  isActive: boolean, 
+  onSelectTask: SelectTaskFunction, 
+  availableLabels: string[], 
+  onAddLabel: AddLabelFunction 
+}) {
   const [isEditing, setIsEditing] = useState(false)
   const [content, setContent] = useState(task.content)
   const [isWeeklyView, setIsWeeklyView] = useState(true)
@@ -155,7 +165,7 @@ function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive
                   variant="ghost"
                   size="sm"
                   className="p-1 h-6 w-6"
-                  aria-label="タスクを削除"
+                  aria-label="タスクカードを削除"
                 >
                   <Trash2 className="h-3 w-3" />
                 </Button>
@@ -245,7 +255,20 @@ function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive
   )
 }
 
-function TaskList({ column, tasks, index, onEditListTitle, onAddTask, onEditTask, onStartTimer, onStopTimer, activeTaskId, onSelectTask, availableLabels, onAddLabel }: { column: Column, tasks: Task[], index: number, onEditListTitle: EditListTitleFunction, onAddTask: AddTaskFunction, onEditTask: EditTaskFunction, onStartTimer: TimerFunction, onStopTimer: TimerFunction, activeTaskId: string | null, onSelectTask: SelectTaskFunction, availableLabels: string[], onAddLabel: AddLabelFunction }) {
+function TaskList({ column, tasks, index, onEditListTitle, onAddTask, onEditTask, onStartTimer, onStopTimer, activeTaskId, onSelectTask, availableLabels, onAddLabel }: { 
+  column: Column, 
+  tasks: Task[], 
+  index: number, 
+  onEditListTitle: EditListTitleFunction, 
+  onAddTask: AddTaskFunction, 
+  onEditTask: EditTaskFunction, 
+  onStartTimer: TimerFunction, 
+  onStopTimer: TimerFunction, 
+  activeTaskId: string | null, 
+  onSelectTask: SelectTaskFunction, 
+  availableLabels: string[], 
+  onAddLabel: AddLabelFunction 
+}) {
   const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState(column.title)
 
