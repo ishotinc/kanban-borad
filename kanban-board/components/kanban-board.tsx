@@ -368,7 +368,7 @@ export function KanbanBoardComponent() {
     columns: {
       'column-1': {
         id: 'column-1',
-        title: '未着手',
+        title: '今日やること',
         taskIds: ['task-1', 'task-2', 'task-3'],
       },
       'column-2': {
