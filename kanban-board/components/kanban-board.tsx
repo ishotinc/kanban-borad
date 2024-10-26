@@ -50,8 +50,12 @@ interface State {
 // 例: onEditTask, onStartTimer, onStopTimer などの関数型を具体的に定義
 type EditTaskFunction = (taskId: string, updatedFields: Partial<Task>) => void;
 type TimerFunction = (taskId: string) => void;
+type EditListTitleFunction = (columnId: string, newTitle: string) => void;
+type AddTaskFunction = (columnId: string) => void;
+type SelectTaskFunction = (task: Task) => void;
+type AddLabelFunction = (labelIndex: number) => void;
 
-function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive, onSelectTask, availableLabels, onAddLabel }: { task: Task, index: number, onEditTask: EditTaskFunction, onStartTimer: TimerFunction, onStopTimer: TimerFunction, isActive: boolean, onSelectTask: Function, availableLabels: string[], onAddLabel: Function }) {
+function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive, onSelectTask, availableLabels, onAddLabel }: { task: Task, index: number, onEditTask: EditTaskFunction, onStartTimer: TimerFunction, onStopTimer: TimerFunction, isActive: boolean, onSelectTask: SelectTaskFunction, availableLabels: string[], onAddLabel: AddLabelFunction }) {
   const [isEditing, setIsEditing] = useState(false)
   const [content, setContent] = useState(task.content)
   const [isWeeklyView, setIsWeeklyView] = useState(true)
@@ -241,7 +245,7 @@ function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive
   )
 }
 
-function TaskList({ column, tasks, index, onEditListTitle, onAddTask, onEditTask, onStartTimer, onStopTimer, activeTaskId, onSelectTask, availableLabels, onAddLabel }: { column: Column, tasks: Task[], index: number, onEditListTitle: Function, onAddTask: Function, onEditTask: EditTaskFunction, onStartTimer: TimerFunction, onStopTimer: TimerFunction, activeTaskId: string | null, onSelectTask: Function, availableLabels: string[], onAddLabel: Function }) {
+function TaskList({ column, tasks, index, onEditListTitle, onAddTask, onEditTask, onStartTimer, onStopTimer, activeTaskId, onSelectTask, availableLabels, onAddLabel }: { column: Column, tasks: Task[], index: number, onEditListTitle: EditListTitleFunction, onAddTask: AddTaskFunction, onEditTask: EditTaskFunction, onStartTimer: TimerFunction, onStopTimer: TimerFunction, activeTaskId: string | null, onSelectTask: SelectTaskFunction, availableLabels: string[], onAddLabel: AddLabelFunction }) {
   const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState(column.title)
 
@@ -775,4 +779,3 @@ export function KanbanBoardComponent() {
     </div>
   )
 }
-
