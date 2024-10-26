@@ -6,8 +6,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Plus, Play, Square, Trash2, ChevronDown, Crown, Flag } from 'lucide-react'
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Plus, Play, Square, Trash2, ChevronDown, Flag } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -79,18 +78,6 @@ function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive
 
   const toggleTimeView = () => {
     setIsWeeklyView(!isWeeklyView)
-  }
-
-  const getBestRecord = () => {
-    if (isWeeklyView) {
-      return task.weeklyBestRecord !== undefined && task.weeklyBestRecord > 0 
-        ? task.weeklyBestRecord 
-        : task.weeklyTotal + currentTime
-    } else {
-      return task.monthlyBestRecord !== undefined && task.monthlyBestRecord > 0 
-        ? task.monthlyBestRecord 
-        : task.monthlyTotal + currentTime
-    }
   }
 
   const handleContentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -543,7 +530,7 @@ export function KanbanBoardComponent() {
     const newTaskId = uuidv4()
     const newTask = {
       id: newTaskId,
-      content: '新しいタスク',
+      content: '新しいスク',
       labels: [],
       assignee: '',
       timeSpent: 0,
