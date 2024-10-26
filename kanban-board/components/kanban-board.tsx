@@ -28,7 +28,7 @@ function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive
   const [goalTime, setGoalTime] = useState(task.goalTime || '')
 
   useEffect(() => {
-    let interval: NodeJS.Timeout
+    let interval
     if (isActive) {
       interval = setInterval(() => {
         setCurrentTime((prevTime) => prevTime + 1)
@@ -387,7 +387,7 @@ export function KanbanBoardComponent() {
   }, [activeTaskId])
 
   useEffect(() => {
-    let interval: NodeJS.Timeout
+    let interval
     if (activeTaskId) {
       interval = setInterval(() => {
         setElapsedTime((prevTime) => prevTime + 1)
