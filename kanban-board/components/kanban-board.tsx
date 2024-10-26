@@ -47,24 +47,16 @@ interface State {
   columnOrder: string[];
 }
 
-// 例: onEditTask, onStartTimer, onStopTimer などの関数型を具体的に定義
-type EditTaskFunction = (taskId: string, updatedFields: Partial<Task>) => void;
-type TimerFunction = (taskId: string) => void;
-type EditListTitleFunction = (columnId: string, newTitle: string) => void;
-type AddTaskFunction = (columnId: string) => void;
-type SelectTaskFunction = (task: Task) => void;
-type AddLabelFunction = (labelIndex: number) => void;
-
 function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive, onSelectTask, availableLabels, onAddLabel }: { 
   task: Task, 
   index: number, 
-  onEditTask: EditTaskFunction, 
-  onStartTimer: TimerFunction, 
-  onStopTimer: TimerFunction, 
+  onEditTask: (taskId: string, updatedFields: Partial<Task>) => void, 
+  onStartTimer: (taskId: string) => void, 
+  onStopTimer: (taskId: string) => void, 
   isActive: boolean, 
-  onSelectTask: SelectTaskFunction, 
+  onSelectTask: (task: Task) => void, 
   availableLabels: string[], 
-  onAddLabel: AddLabelFunction 
+  onAddLabel: (labelIndex: number) => void 
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [content, setContent] = useState(task.content)
@@ -259,15 +251,15 @@ function TaskList({ column, tasks, index, onEditListTitle, onAddTask, onEditTask
   column: Column, 
   tasks: Task[], 
   index: number, 
-  onEditListTitle: EditListTitleFunction, 
-  onAddTask: AddTaskFunction, 
-  onEditTask: EditTaskFunction, 
-  onStartTimer: TimerFunction, 
-  onStopTimer: TimerFunction, 
+  onEditListTitle: (columnId: string, newTitle: string) => void, 
+  onAddTask: (columnId: string) => void, 
+  onEditTask: (taskId: string, updatedFields: Partial<Task>) => void, 
+  onStartTimer: (taskId: string) => void, 
+  onStopTimer: (taskId: string) => void, 
   activeTaskId: string | null, 
-  onSelectTask: SelectTaskFunction, 
+  onSelectTask: (task: Task) => void, 
   availableLabels: string[], 
-  onAddLabel: AddLabelFunction 
+  onAddLabel: (labelIndex: number) => void 
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState(column.title)
@@ -350,42 +342,6 @@ function TaskList({ column, tasks, index, onEditListTitle, onAddTask, onEditTask
         </div>
       )}
     </Draggable>
-  )
-}
-
-function PersistentHeader({ activeTask, elapsedTime, onStopTimer, onStartTimer }: { activeTask: Task | null, elapsedTime: number, onStopTimer: () => void, onStartTimer: (taskId: string) => void }) {
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    const remainingSeconds = seconds % 60
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
-  }
-
-  return (
-    <div className="flex items-center justify-between bg-[#37AB9D] text-white p-4 mb-4 rounded-lg">
-      <div className="flex items-center space-x-2 flex-grow">
-        {activeTask && (
-          <>
-            <Badge style={{ backgroundColor: labelColors.label1 }}>{activeTask.labels[0]}</Badge>
-            <Badge style={{ backgroundColor: labelColors.label2 }}>{activeTask.labels[1]}</Badge>
-            <span className="font-bold">{activeTask.content}</span>
-          </>
-        )}
-      </div>
-      <div className="flex items-center space-x-4">
-        <span className="text-xl font-bold">{formatTime(elapsedTime)}</span>
-        {activeTask && (
-          <Button 
-            onClick={activeTask.isActive ? onStopTimer : () => onStartTimer(activeTask.id)} 
-            variant="secondary" 
-            size="icon" 
-            className="rounded-full bg-[#f14134] text-white hover:bg-[#d63a2f]"
-          >
-            {activeTask.isActive ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          </Button>
-        )}
-      </div>
-    </div>
   )
 }
 
@@ -723,14 +679,39 @@ export function KanbanBoardComponent() {
     }
   }
 
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    const remainingSeconds = seconds % 60
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
+  }
+
   return (
     <div className="p-4 bg-white">
-      <PersistentHeader
-        activeTask={selectedTask}
-        elapsedTime={elapsedTime}
-        onStopTimer={handleStopTimer}
-        onStartTimer={handleStartTimer}
-      />
+      <div className="flex items-center justify-between bg-[#37AB9D] text-white p-4 mb-4 rounded-lg">
+        <div className="flex items-center space-x-2 flex-grow">
+          {selectedTask && (
+            <>
+              <Badge style={{ backgroundColor: labelColors.label1 }}>{selectedTask.labels[0]}</Badge>
+              <Badge style={{ backgroundColor: labelColors.label2 }}>{selectedTask.labels[1]}</Badge>
+              <span className="font-bold">{selectedTask.content}</span>
+            </>
+          )}
+        </div>
+        <div className="flex items-center space-x-4">
+          <span className="text-xl font-bold">{formatTime(elapsedTime)}</span>
+          {selectedTask && (
+            <Button 
+              onClick={selectedTask.isActive ? handleStopTimer : () => handleStartTimer(selectedTask.id)} 
+              variant="secondary" 
+              size="icon" 
+              className="rounded-full bg-[#f14134] text-white hover:bg-[#d63a2f]"
+            >
+              {selectedTask.isActive ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </Button>
+          )}
+        </div>
+      </div>
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="all-columns" direction="horizontal" type="column">
           {(provided) => (
