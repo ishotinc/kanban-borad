@@ -227,7 +227,11 @@ function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive
                     <Button
                       onClick={(e) => {
                         e.stopPropagation()
-                        isActive ? onStopTimer(task.id) : onStartTimer(task.id)
+                        if (isActive) {
+                          onStopTimer(task.id);
+                        } else {
+                          onStartTimer(task.id);
+                        }
                       }}
                       variant="ghost"
                       size="sm"
