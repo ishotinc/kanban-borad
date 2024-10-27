@@ -517,7 +517,7 @@ export function KanbanBoardComponent() {
     const newTaskId = uuidv4()
     const newTask = {
       id: newTaskId,
-      content: '新しいスク',
+      content: '新しいタスク',
       labels: [],
       assignee: '',
       timeSpent: 0,
