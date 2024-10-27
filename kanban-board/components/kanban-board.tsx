@@ -225,14 +225,14 @@ function TaskCard({ task, index, onEditTask, onStartTimer, onStopTimer, isActive
                   </span>
                   {task.isSelected && (
                     <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (isActive) {
-                          onStopTimer(task.id);
-                        } else {
-                          onStartTimer(task.id);
-                        }
-                      }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isActive) {
+                        onStopTimer(task.id);
+                      } else {
+                        onStartTimer(task.id);
+                      }
+                    }}
                       variant="ghost"
                       size="sm"
                       className={`p-0 h-6 w-6 rounded-full ${isActive ? 'bg-[#f14134]' : 'bg-[#f14134] bg-opacity-20'} hover:bg-[#f14134] hover:bg-opacity-30`}
